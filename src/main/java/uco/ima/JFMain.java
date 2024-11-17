@@ -41,7 +41,7 @@ public class JFMain extends JFrame {
 
         setContentPane(contentPane);
         contentPane.setLayout(new BorderLayout(0, 0));
-        int size = 5;
+        int size = 19;
         contentPane.add(new JPGrid(new Game(size), size));
     }
 }

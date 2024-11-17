@@ -23,7 +23,7 @@ public class JPGrid extends JPanel {
     public JPGrid(Game game, int size) {
         this.size = size;
         this.game = game;
-        b = 10; s = 60; r = 25;
+        b = 10; s = 33; r = 12;
         firstClick = true;
         mousePlay = new MouseAdapter() {
             @Override
