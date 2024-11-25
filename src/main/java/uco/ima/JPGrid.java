@@ -1,20 +1,17 @@
 package uco.ima;
 
-
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-
 import javax.swing.JPanel;
 
 public class JPGrid extends JPanel {
 
     private static final long serialVersionUID = 1L;
     private int size, b, s, r;
-    private Game game;				// objet représentant la grille de jeu et contrôlant les déplacements
-    private boolean firstClick;
-    private Position start;			// position de la case de départ
+    private Game game;           // Objet représentant la grille de jeu et contrôlant les déplacements
     private MouseAdapter mousePlay;
 
     /**
@@ -23,8 +20,10 @@ public class JPGrid extends JPanel {
     public JPGrid(Game game, int size) {
         this.size = size;
         this.game = game;
-        b = 10; s = 33; r = 12;
-        firstClick = true;
+        b = 10; // Bordure
+        s = 33; // Taille des cases
+        r = 12; // Rayon des pierres
+
         mousePlay = new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
@@ -38,53 +37,69 @@ public class JPGrid extends JPanel {
         this.addMouseListener(mousePlay);
     }
 
-    public void disenableClick() {
+    public void disableClick() {
         this.removeMouseListener(mousePlay);
     }
+
     private void click(MouseEvent e) {
-//		Déterminer le numéro de ligne i et le numéro de colonne j de la case cliquée
+        // Déterminer la position cliquée
         int j = (e.getX() - b) / s;
         int i = (e.getY() - b) / s;
-        if (firstClick) {
-            // Retenir le pion cliqué
-            start = new Position(i, j);
-        } else {
-            Position end = new Position(i, j);
-            Move move = new Move(start, end);
-            if (game.moveValid(move)) {
-                game.makeMove(move);
-                repaint();
-                if (game.isOver()) {
-                    System.out.println("Le match a fini ! " + game.getWinner() + " a gagné !");
-                    disenableClick();
-                }
-            } else {
-                System.out.println("Movement invalide ! Recommencez !");
+
+        Position pos = new Position(i, j);
+
+        // Vérifier si le mouvement est valide et l'appliquer
+        if (game.isMoveValid(pos)) {
+            game.makeMove(pos);
+            repaint(); // Rafraîchit l'affichage de la grille
+
+            if (game.isOver()) {
+                repaint(); // Rafraîchir pour afficher le message de victoire
+                System.out.println("Le match est terminé ! " + game.getWinner() + " a gagné !");
+                disableClick();
             }
+        } else {
+            System.out.println("Coup invalide ! Réessayez.");
         }
-        firstClick = !firstClick;
     }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+
         // Dessiner la grille
-        int xMax = b + size*s, yMax = b + size*s;
-        for (int y = b; y <= yMax; y += s)
+        int xMax = b + size * s, yMax = b + size * s;
+        for (int y = b; y <= yMax; y += s) {
             g.drawLine(b, y, xMax, y);
-        for (int x = b; x <= xMax; x += s)
+        }
+        for (int x = b; x <= xMax; x += s) {
             g.drawLine(x, b, x, yMax);
-        // Dessiner les pions suivant leur position donnée dans le tableau pion
-        for (int i = 0; i < size; i++)
+        }
+
+        // Dessiner les pierres suivant leur position donnée dans la grille
+        for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                if (game.getPion(i, j) == PlayerColor.BLACK) {	// pion noir
-                    // Dessiner un pion noir à la case (i,j)
+                if (game.getPion(i, j) == PlayerColor.BLACK) {
                     g.setColor(Color.BLACK);
-                    g.fillOval(b + j * s + s/2 - r, b + i * s + s/2 - r, 2*r, 2*r);
+                    g.fillOval(b + j * s + s / 2 - r, b + i * s + s / 2 - r, 2 * r, 2 * r);
                 } else if (game.getPion(i, j) == PlayerColor.WHITE) {
-                    // Dessiner un pion blanc à la case (i,j)
                     g.setColor(Color.WHITE);
-                    g.fillOval(b + j * s + s/2 - r, b + i * s + s/2 - r, 2*r, 2*r);
+                    g.fillOval(b + j * s + s / 2 - r, b + i * s + s / 2 - r, 2 * r, 2 * r);
                 }
             }
+        }
+
+        // Afficher les scores de captures
+        g.setFont(new Font("Arial", Font.BOLD, 16));
+        g.setColor(Color.BLACK);
+        g.drawString("Captures BLACK: " + game.getCaptures(PlayerColor.BLACK), b, yMax + 30);
+        g.setColor(Color.WHITE);
+        g.drawString("Captures WHITE: " + game.getCaptures(PlayerColor.WHITE), b, yMax + 50);
+
+        // Afficher un message si le jeu est terminé
+        if (game.isOver()) {
+            g.setColor(Color.RED);
+            g.drawString("Victoire de " + game.getWinner() + " !", b, yMax + 70);
+        }
     }
 }

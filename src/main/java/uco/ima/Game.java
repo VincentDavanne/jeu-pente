@@ -1,94 +1,161 @@
 package uco.ima;
 
 public class Game {
+    // Attributs (inchangés)
     private int size;
-    private PlayerColor[][] pion;
+    private PlayerColor[][] grid;
     private PlayerColor currentPlayer, theWinner;
     private boolean over;
-    private int direction;		// variation de x des déplacements de currentPlayer
+    private int capturesWhite, capturesBlack;
 
     public Game(int size) {
         this.size = size;
-        // Créer et initialiser le tableau pion
-        pion = new PlayerColor [size][size];
-        for (int j = 0; j < size; j++) {
-            pion[0][j] = PlayerColor.BLACK;
-            pion[size-1][j] = PlayerColor.WHITE;
-        }
-        currentPlayer = PlayerColor.WHITE;
-        direction = -1;
+        grid = new PlayerColor[size][size];
+        currentPlayer = PlayerColor.BLACK; // Commence avec BLACK
         theWinner = null;
         over = false;
+        capturesWhite = 0;
+        capturesBlack = 0;
     }
-    public boolean moveValid(Move move) {
-        // Vérifier que la case de départ contient currentPlayer.
-        // Si currentPlayer est WHITE :
-        // - la case d'arrivée est au dessus de la case de départ et est vide
-        // - ou la case d'arrivée est au dessus en diagonale de la case de départ
-        //   et contient la couleur adverse.
-        // Si currentPlayer est BLACK : similaire dans la direction inverse
-        int x1 = move.getStart().getX(), y1 = move.getStart().getY();
-        int x2 = move.getEnd().getX(), y2 = move.getEnd().getY();
-        if (pion[x1][y1] == currentPlayer) {
-            if (x2 == x1 + direction && y2 == y1 && pion[x2][y2] == null)
-                return true;
-            else if (x2 == x1 + direction && Math.abs(y2 - y1) == 1
-                    && pion[x2][y2] == currentPlayer.inverse())
-                return true;
+
+    public int getSize() {
+        return size;
+    }
+
+    public PlayerColor getCurrentPlayer() {
+        return currentPlayer;
+    }
+
+    public boolean isMoveValid(Position pos) {
+        int x = pos.getX();
+        int y = pos.getY();
+        return x >= 0 && x < size && y >= 0 && y < size && grid[x][y] == null;
+    }
+
+    public void makeMove(Position pos) {
+        int x = pos.getX();
+        int y = pos.getY();
+
+        if (!isMoveValid(pos)) {
+            throw new IllegalArgumentException("Coup invalide !");
         }
-        return false;
-    }
-    public void makeMove(Move move) {
-        // Mettre la couleur de la case de départ à la case d'arrivée
-        // et vider la case de départ
-        int x1 = move.getStart().getX(), y1 = move.getStart().getY();
-        int x2 = move.getEnd().getX(), y2 = move.getEnd().getY();
-        pion[x2][y2] = pion[x1][y1];
-        pion[x1][y1] = null;
-        // Vérifier si le match a fini : currentPlayer est arrivé
-        // x2 = 0 pour currentPlayer WHITE ou x2 = size-1 pour currentPlayer BLACK
-        if(x2 == 0 || x2 == size-1) {
+
+        // Place la pierre sur la grille
+        grid[x][y] = currentPlayer;
+
+        // Vérifie les captures
+        checkAndCapture(x, y);
+
+        // Vérifie si un joueur a gagné
+        if (checkWin(x, y)) {
             over = true;
             theWinner = currentPlayer;
-        }
-        currentPlayer = currentPlayer.inverse();
-        direction = -direction;
-        // Vérifier si le match a fini : currentPlayer ne peut plus bouger
-        if (!canMove()) {
+        } else if (capturesWhite >= 10 || capturesBlack >= 10) { // Victoire par captures
             over = true;
-            theWinner = currentPlayer.inverse();
+            theWinner = (capturesWhite >= 10) ? PlayerColor.WHITE : PlayerColor.BLACK;
+        }
+
+        // Change de joueur
+        currentPlayer = currentPlayer.inverse();
+    }
+
+    private void checkAndCapture(int x, int y) {
+        int[][] directions = {{0, 1}, {1, 0}, {1, 1}, {1, -1}};
+        for (int[] dir : directions) {
+            int dx = dir[0], dy = dir[1];
+
+            // Vérifier la capture dans une direction
+            if (canCapture(x, y, dx, dy)) {
+                System.out.println("Capture détectée à partir de (" + x + "," + y + ") dans la direction (" + dx + "," + dy + ")");
+                captureStones(x, y, dx, dy);
+            }
+
+            // Vérifier la capture dans la direction opposée
+            if (canCapture(x, y, -dx, -dy)) {
+                System.out.println("Capture détectée à partir de (" + x + "," + y + ") dans la direction opposée (" + -dx + "," + -dy + ")");
+                captureStones(x, y, -dx, -dy);
+            }
         }
     }
-    public boolean canMove() {
-        // Vérifie que le Player peut se déplacer
-        for(int i = 0; i<size;i++) {
-            for(int j = 0; j<size;j++) {
-                if(pion[i][j] == currentPlayer) {
-                    // Créer 3 déplacements à partir de cette positio
-                    Position s = new Position(i,j),
-                            e1 = new Position(i+direction,j),
-                            e2 = new Position(i+direction,Math.max(0,j-1)),
-                            e3 = new Position(i+direction,Math.min(j+1,size-1));
-                    Move m1 = new Move(s,e1),
-                            m2 = new Move(s,e2),
-                            m3 = new Move(s,e3);
-                    if(moveValid(m1)|| moveValid(m2)||moveValid(m3)) {
-                        return true;
-                    }
-                }
+
+    private boolean canCapture(int x, int y, int dx, int dy) {
+        int x1 = x + dx, y1 = y + dy;
+        int x2 = x + 2 * dx, y2 = y + 2 * dy;
+        int x3 = x + 3 * dx, y3 = y + 3 * dy;
+
+        // Vérifie si les coordonnées sont dans les limites de la grille
+        if (!isWithinBounds(x1, y1) || !isWithinBounds(x2, y2) || !isWithinBounds(x3, y3)) {
+            return false;
+        }
+
+        // Vérifie si les pierres capturées et de bordure sont correctes
+        return grid[x1][y1] == currentPlayer.inverse() // Première pierre adverse
+                && grid[x2][y2] == currentPlayer.inverse() // Deuxième pierre adverse
+                && grid[x3][y3] == currentPlayer;         // Pierre actuelle du joueur
+    }
+
+    private void captureStones(int x, int y, int dx, int dy) {
+        int x1 = x + dx, y1 = y + dy;
+        int x2 = x + 2 * dx, y2 = y + 2 * dy;
+
+        // Vérifie si les pierres à capturer sont bien dans les limites
+        if (isWithinBounds(x1, y1) && isWithinBounds(x2, y2)) {
+            System.out.println("Pierres capturées : (" + x1 + "," + y1 + ") et (" + x2 + "," + y2 + ")");
+            grid[x1][y1] = null;
+            grid[x2][y2] = null;
+
+            // Met à jour le compteur de captures
+            if (currentPlayer == PlayerColor.BLACK) {
+                capturesBlack += 2;
+            } else {
+                capturesWhite += 2;
+            }
+        }
+    }
+
+
+
+    private boolean checkWin(int x, int y) {
+        int[][] directions = {{0, 1}, {1, 0}, {1, 1}, {1, -1}};
+
+        for (int[] dir : directions) {
+            int dx = dir[0], dy = dir[1];
+            if (countConsecutive(x, y, dx, dy) + countConsecutive(x, y, -dx, -dy) - 1 >= 5) {
+                return true;
             }
         }
         return false;
     }
 
-    public PlayerColor getPion(int i, int j) {
-        return pion[i][j];
+    private int countConsecutive(int x, int y, int dx, int dy) {
+        int count = 0;
+        PlayerColor color = grid[x][y];
+
+        while (isWithinBounds(x, y) && grid[x][y] == color) {
+            count++;
+            x += dx;
+            y += dy;
+        }
+        return count;
     }
+
+    private boolean isWithinBounds(int x, int y) {
+        return x >= 0 && x < size && y >= 0 && y < size;
+    }
+
+    public PlayerColor getPion(int x, int y) {
+        return grid[x][y];
+    }
+
     public boolean isOver() {
         return over;
     }
+
     public PlayerColor getWinner() {
         return theWinner;
     }
 
+    public int getCaptures(PlayerColor player) {
+        return (player == PlayerColor.WHITE) ? capturesWhite : capturesBlack;
+    }
 }
