@@ -43,8 +43,13 @@ public class JPGrid extends JPanel {
 
     private void click(MouseEvent e) {
         // Déterminer la position cliquée
-        int j = (e.getX() - b) / s;
-        int i = (e.getY() - b) / s;
+        int x = e.getX();
+        int y = e.getY();
+
+// Calculer la position en indices sur la grille, en arrondissant au plus proche
+        int j = Math.round((float)(x - b) / s);
+        int i = Math.round((float)(y - b) / s);
+
 
         Position pos = new Position(i, j);
 
@@ -81,10 +86,10 @@ public class JPGrid extends JPanel {
             for (int j = 0; j < size; j++) {
                 if (game.getPion(i, j) == PlayerColor.BLACK) {
                     g.setColor(Color.BLACK);
-                    g.fillOval(b + j * s + s / 2 - r, b + i * s + s / 2 - r, 2 * r, 2 * r);
+                    g.fillOval(b + j * s - r, b + i * s - r, 2 * r, 2 * r);
                 } else if (game.getPion(i, j) == PlayerColor.WHITE) {
                     g.setColor(Color.WHITE);
-                    g.fillOval(b + j * s + s / 2 - r, b + i * s + s / 2 - r, 2 * r, 2 * r);
+                    g.fillOval(b + j * s - r, b + i * s - r, 2 * r, 2 * r);
                 }
             }
         }
