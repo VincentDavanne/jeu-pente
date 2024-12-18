@@ -1,11 +1,7 @@
 package uco.ima;
 
-import java.awt.BorderLayout;
-import java.awt.EventQueue;
-import java.awt.GridLayout;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
+import java.awt.*;
+import javax.swing.*;
 
 public class JFMain extends JFrame {
 
@@ -13,7 +9,14 @@ public class JFMain extends JFrame {
     private JPanel contentPane;
     private JPGrid gameGrid;
     private Game game;
-    private int size = 19; // Taille de la grille
+    private int size = 19;
+    private JPanel pnDroit;
+    private JPanel pnChoix;
+    private JLabel lblNewLabel;
+    private JComboBox cbBlanc;
+    private JLabel lblJoueurNoir;
+    private JComboBox cbNoir;
+    //private AbstractPlayer whitePlayer, blackPlayer;// Taille de la grille
 
     /**
      * Launch the application.
@@ -64,6 +67,29 @@ public class JFMain extends JFrame {
         optionsPanel.add(btnHvsAI);
 
         contentPane.add(optionsPanel, BorderLayout.SOUTH);
+        pnDroit = new JPanel();
+        pnDroit.setPreferredSize(new Dimension(220, 10));
+        contentPane.add(pnDroit, BorderLayout.EAST);
+        pnDroit.setLayout(new BorderLayout(0, 0));
+
+        pnChoix = new JPanel();
+        pnChoix.setPreferredSize(new Dimension(10, 100));
+        pnDroit.add(pnChoix, BorderLayout.NORTH);
+        pnChoix.setLayout(new GridLayout(2, 2, 0, 0));
+
+        lblNewLabel = new JLabel("Joueur Blanc");
+        pnChoix.add(lblNewLabel);
+
+        cbBlanc = new JComboBox();
+        cbBlanc.setModel(new DefaultComboBoxModel(new String[] {"Joueur IA Simple", "Joueur IA Min-Max", "Joueur Humain"}));
+        pnChoix.add(cbBlanc);
+
+        lblJoueurNoir = new JLabel("Joueur Noir");
+        pnChoix.add(lblJoueurNoir);
+
+        cbNoir = new JComboBox();
+        cbNoir.setModel(new DefaultComboBoxModel(new String[] {"Joueur IA Simple", "Joueur IA Min-Max", "Joueur Humain"}));
+        pnChoix.add(cbNoir);
     }
 
     private void restartGame() {
