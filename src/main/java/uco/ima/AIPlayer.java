@@ -13,14 +13,14 @@ public class AIPlayer {
 
     public Position getMove(Game game) {
         // Chercher un mouvement stratégique
-        for (int i = 0; i < game.getSize(); i++) {
-            for (int j = 0; j < game.getSize(); j++) {
-                Position pos = new Position(i, j);
-                if (game.isMoveValid(pos)) {
-                    return pos; // Premier coup valide trouvé
-                }
-            }
-        }
+        //for (int i = 0; i < game.getSize(); i++) {
+         //   for (int j = 0; j < game.getSize(); j++) {
+           //     Position pos = new Position(i, j);
+             //   if (game.isMoveValid(pos)) {
+               //     return pos; // Premier coup valide trouvé
+                //}
+            //}
+        //}
 
         // Si aucun mouvement stratégique trouvé, choisir aléatoirement
         int x, y;

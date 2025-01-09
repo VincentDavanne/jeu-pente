@@ -5,7 +5,7 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 public class JPGrid extends JPanel {
 
@@ -60,6 +60,8 @@ public class JPGrid extends JPanel {
 
             if (game.isOver()) {
                 repaint(); // Rafraîchir pour afficher le message de victoire
+                JOptionPane.showMessageDialog(this,
+                        "Le match est terminé ! La couleur " + game.getWinner() + " a gagné !");
                 System.out.println("Le match est terminé ! " + game.getWinner() + " a gagné !");
                 disableClick();
             }

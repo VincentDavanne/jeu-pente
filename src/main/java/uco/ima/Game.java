@@ -11,7 +11,7 @@ public class Game {
     public Game(int size) {
         this.size = size;
         grid = new PlayerColor[size][size];
-        currentPlayer = PlayerColor.BLACK; // Commence avec BLACK
+        currentPlayer = PlayerColor.WHITE; // Commence avec White
         theWinner = null;
         over = false;
         capturesWhite = 0;

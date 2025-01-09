@@ -2,6 +2,7 @@ package uco.ima;
 
 import java.awt.*;
 import javax.swing.*;
+import javax.swing.JOptionPane;
 
 public class JFMain extends JFrame {
 
@@ -103,7 +104,26 @@ public class JFMain extends JFrame {
 
     private void startHumanVsHuman() {
         restartGame();
-        System.out.println("Mode Humain vs Humain activé !");
+        gameGrid.enableClick(); // Activer les clics pour les joueurs humains
+
+        // Thread pour surveiller si le jeu est terminé
+        new Thread(() -> {
+            while (!game.isOver()) {
+                if (game.isOver()) {
+                    SwingUtilities.invokeLater(() -> {
+                        JOptionPane.showMessageDialog(this,
+                                "Le match est terminé ! " + game.getWinner() + " a gagné !");
+                    });
+                    break;
+                }
+
+                try {
+                    Thread.sleep(500); // Petite pause pour éviter des boucles intensives
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
     private void startHumanVsAI() {
@@ -117,7 +137,10 @@ public class JFMain extends JFrame {
         new Thread(() -> {
             while (!game.isOver()) {
                 if (game.isOver()) {
-                    System.out.println("Le match est terminé ! " + game.getWinner() + " a gagné !");
+                    SwingUtilities.invokeLater(() -> {
+                        JOptionPane.showMessageDialog(this,
+                                "Le match est terminé ! " + game.getWinner() + " a gagné !");
+                    });
                     break;
                 }
 
@@ -127,11 +150,14 @@ public class JFMain extends JFrame {
                     game.makeMove(aiMove);
 
                     // Mettre à jour l'interface graphique
-                    gameGrid.repaint();
+                    SwingUtilities.invokeLater(() -> gameGrid.repaint());
 
                     // Vérifier si le jeu est terminé
                     if (game.isOver()) {
-                        System.out.println("Le match est terminé ! WHITE a gagné !");
+                        SwingUtilities.invokeLater(() -> {
+                            JOptionPane.showMessageDialog(this,
+                                    "Le match est terminé ! " + game.getWinner() + " a gagné !");
+                        });
                         break;
                     }
                 }
@@ -144,6 +170,7 @@ public class JFMain extends JFrame {
             }
         }).start();
     }
+
 
 
 }
