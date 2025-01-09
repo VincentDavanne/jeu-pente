@@ -36,6 +36,7 @@ public class JFMain extends JFrame {
     /**
      * Create the frame.
      */
+    // JFMain.java
     public JFMain() {
         setTitle("Jeu de Pente");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -44,132 +45,121 @@ public class JFMain extends JFrame {
         contentPane.setLayout(new BorderLayout());
         setContentPane(contentPane);
 
-        // Initialisation du jeu
-        game = new Game(size);
+        // Création des joueurs avec la couleur spécifique
+        AbstractPlayer whitePlayer = new HumanPlayer(PlayerColor.WHITE);  // Exemple : Humain avec la couleur blanche
+        AbstractPlayer blackPlayer = new AIPlayer(PlayerColor.BLACK);    // Exemple : IA avec la couleur noire
+
+        // Initialisation du jeu avec les joueurs
+        game = new Game(size, whitePlayer, blackPlayer);
         gameGrid = new JPGrid(game, size);
         contentPane.add(gameGrid, BorderLayout.CENTER);
 
-        // Panneau des options
-        JPanel optionsPanel = new JPanel(new GridLayout(1, 3));
-
-        // Bouton pour redémarrer le jeu
-        JButton btnRestart = new JButton("Redémarrer");
-        btnRestart.addActionListener(e -> restartGame());
-        optionsPanel.add(btnRestart);
-
-        // Bouton pour Humain vs Humain
-        JButton btnHvsH = new JButton("Humain vs Humain");
-        btnHvsH.addActionListener(e -> startHumanVsHuman());
-        optionsPanel.add(btnHvsH);
-
-        // Bouton pour Humain vs IA
-        JButton btnHvsAI = new JButton("Humain vs IA");
-        btnHvsAI.addActionListener(e -> startHumanVsAI());
-        optionsPanel.add(btnHvsAI);
-
-        contentPane.add(optionsPanel, BorderLayout.SOUTH);
+        // Panneau latéral pour les options de joueurs
         pnDroit = new JPanel();
         pnDroit.setPreferredSize(new Dimension(220, 10));
         contentPane.add(pnDroit, BorderLayout.EAST);
         pnDroit.setLayout(new BorderLayout(0, 0));
 
+        // Panneau des choix (combobox + bouton)
         pnChoix = new JPanel();
-        pnChoix.setPreferredSize(new Dimension(10, 100));
+        pnChoix.setPreferredSize(new Dimension(10, 140));
         pnDroit.add(pnChoix, BorderLayout.NORTH);
-        pnChoix.setLayout(new GridLayout(2, 2, 0, 0));
+        pnChoix.setLayout(new GridLayout(3, 2, 5, 10));
 
+        // Combobox pour le joueur blanc
         lblNewLabel = new JLabel("Joueur Blanc");
         pnChoix.add(lblNewLabel);
 
         cbBlanc = new JComboBox();
-        cbBlanc.setModel(new DefaultComboBoxModel(new String[] {"Joueur IA Simple", "Joueur IA Min-Max", "Joueur Humain"}));
+        cbBlanc.setModel(new DefaultComboBoxModel(new String[] {
+                "Joueur IA", "Joueur Humain"
+        }));
         pnChoix.add(cbBlanc);
 
+        // Combobox pour le joueur noir
         lblJoueurNoir = new JLabel("Joueur Noir");
         pnChoix.add(lblJoueurNoir);
 
         cbNoir = new JComboBox();
-        cbNoir.setModel(new DefaultComboBoxModel(new String[] {"Joueur IA Simple", "Joueur IA Min-Max", "Joueur Humain"}));
+        cbNoir.setModel(new DefaultComboBoxModel(new String[] {
+                "Joueur IA", "Joueur Humain"
+        }));
         pnChoix.add(cbNoir);
+
+        // Bouton "Start"
+        JButton btnStart = new JButton("Démarrer");
+        pnChoix.add(new JLabel()); // Pour l'alignement
+        pnChoix.add(btnStart);
+
+        // Action du bouton "Start"
+        btnStart.addActionListener(e -> startGame());
     }
 
-    private void restartGame() {
-        game = new Game(size);
+
+
+
+
+    private void startGame() {
+        // Récupère les choix des combobox
+        boolean isWhiteHuman = cbBlanc.getSelectedItem().equals("Joueur Humain");
+        boolean isBlackHuman = cbNoir.getSelectedItem().equals("Joueur Humain");
+
+        // Créer les joueurs selon les choix
+        AbstractPlayer whitePlayer;
+        AbstractPlayer blackPlayer;
+
+        if (isWhiteHuman) {
+            whitePlayer = new HumanPlayer(PlayerColor.WHITE);  // Joueur blanc humain
+        } else {
+            whitePlayer = new AIPlayer(PlayerColor.WHITE);     // Joueur blanc IA
+        }
+
+        if (isBlackHuman) {
+            blackPlayer = new HumanPlayer(PlayerColor.BLACK);  // Joueur noir humain
+        } else {
+            blackPlayer = new AIPlayer(PlayerColor.BLACK);     // Joueur noir IA
+        }
+
+        // Redémarre le jeu avec les nouveaux joueurs
+        game = new Game(size, whitePlayer, blackPlayer);
         contentPane.remove(gameGrid);
         gameGrid = new JPGrid(game, size);
         contentPane.add(gameGrid, BorderLayout.CENTER);
         contentPane.revalidate();
         contentPane.repaint();
+
+        // Si un des joueurs est une IA, lance un thread pour jouer automatiquement
+        new Thread(() -> playGame(whitePlayer, blackPlayer)).start();
     }
 
-    private void startHumanVsHuman() {
-        restartGame();
-        gameGrid.enableClick(); // Activer les clics pour les joueurs humains
 
-        // Thread pour surveiller si le jeu est terminé
-        new Thread(() -> {
-            while (!game.isOver()) {
-                if (game.isOver()) {
-                    SwingUtilities.invokeLater(() -> {
-                        JOptionPane.showMessageDialog(this,
-                                "Le match est terminé ! " + game.getWinner() + " a gagné !");
-                    });
-                    break;
-                }
+    private void playGame(AbstractPlayer whitePlayer, AbstractPlayer blackPlayer) {
+        while (!game.isOver()) {
+            AbstractPlayer currentPlayer = game.getCurrentPlayer();
 
-                try {
-                    Thread.sleep(500); // Petite pause pour éviter des boucles intensives
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+            if (currentPlayer instanceof AIPlayer) {
+                // Jouer un coup automatiquement pour l'IA
+                Position move = currentPlayer.getMove(game);
+                game.makeMove(move);
+
+                // Mettre à jour l'interface graphique
+                SwingUtilities.invokeLater(() -> gameGrid.repaint());
             }
-        }).start();
-    }
 
-    private void startHumanVsAI() {
-        restartGame();
-        AIPlayer ai = new AIPlayer(PlayerColor.WHITE);
-
-        // Activer un écouteur pour les mouvements humains
-        gameGrid.enableClick();
-
-        // Thread pour gérer les mouvements IA
-        new Thread(() -> {
-            while (!game.isOver()) {
-                if (game.isOver()) {
-                    SwingUtilities.invokeLater(() -> {
-                        JOptionPane.showMessageDialog(this,
-                                "Le match est terminé ! " + game.getWinner() + " a gagné !");
-                    });
-                    break;
-                }
-
-                // Si c'est au tour de l'IA de jouer
-                if (game.getCurrentPlayer() == PlayerColor.WHITE) {
-                    Position aiMove = ai.getMove(game);
-                    game.makeMove(aiMove);
-
-                    // Mettre à jour l'interface graphique
-                    SwingUtilities.invokeLater(() -> gameGrid.repaint());
-
-                    // Vérifier si le jeu est terminé
-                    if (game.isOver()) {
-                        SwingUtilities.invokeLater(() -> {
-                            JOptionPane.showMessageDialog(this,
-                                    "Le match est terminé ! " + game.getWinner() + " a gagné !");
-                        });
-                        break;
-                    }
-                }
-
-                try {
-                    Thread.sleep(500); // Petite pause pour éviter des actions immédiates
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+            try {
+                Thread.sleep(500); // Pause pour fluidité
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-        }).start();
+        }
+
+        // Partie terminée
+        SwingUtilities.invokeLater(() -> {
+            JOptionPane.showMessageDialog(this,
+                    "Le match est terminé ! " + game.getWinner() + " a gagné !");
+        });
     }
+
 
 
 

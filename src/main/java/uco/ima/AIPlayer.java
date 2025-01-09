@@ -2,12 +2,11 @@ package uco.ima;
 
 import java.util.Random;
 
-public class AIPlayer {
-    private PlayerColor aiColor;
+public class AIPlayer extends AbstractPlayer{
     private Random random;
 
-    public AIPlayer(PlayerColor aiColor) {
-        this.aiColor = aiColor;
+    public AIPlayer(PlayerColor color) {
+        super(color);  // Appel du constructeur de la classe parente
         this.random = new Random();
     }
 

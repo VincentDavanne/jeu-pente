@@ -1,28 +1,40 @@
 package uco.ima;
 
+// Game.java
 public class Game {
-    // Attributs (inchangés)
-    private int size;
+    private int size;  // Déclare la variable 'size'
     private PlayerColor[][] grid;
     private PlayerColor currentPlayer, theWinner;
     private boolean over;
     private int capturesWhite, capturesBlack;
+    private AbstractPlayer whitePlayer;
+    private AbstractPlayer blackPlayer;
 
-    public Game(int size) {
-        this.size = size;
-        grid = new PlayerColor[size][size];
-        currentPlayer = PlayerColor.WHITE; // Commence avec White
-        theWinner = null;
-        over = false;
-        capturesWhite = 0;
-        capturesBlack = 0;
+    // Constructeur modifié
+    public Game(int size, AbstractPlayer whitePlayer, AbstractPlayer blackPlayer) {
+        this.size = size;  // Initialisation de la variable 'size'
+        this.whitePlayer = whitePlayer;
+        this.blackPlayer = blackPlayer;
+        this.currentPlayer = PlayerColor.WHITE;
+        this.theWinner = null;
+        this.over = false;
+        this.capturesWhite = 0;
+        this.capturesBlack = 0;
+        this.grid = new PlayerColor[size][size];
+    }
+
+
+
+
+    public AbstractPlayer getCurrentPlayer() {
+        return (currentPlayer == PlayerColor.WHITE) ? whitePlayer : blackPlayer;
     }
 
     public int getSize() {
         return size;
     }
 
-    public PlayerColor getCurrentPlayer() {
+    public PlayerColor getCurrentPlayerColor() {
         return currentPlayer;
     }
 
@@ -113,8 +125,6 @@ public class Game {
         }
     }
 
-
-
     private boolean checkWin(int x, int y) {
         int[][] directions = {{0, 1}, {1, 0}, {1, 1}, {1, -1}};
 
@@ -159,3 +169,4 @@ public class Game {
         return (player == PlayerColor.WHITE) ? capturesWhite : capturesBlack;
     }
 }
+
