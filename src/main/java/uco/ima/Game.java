@@ -1,6 +1,5 @@
 package uco.ima;
 
-// Game.java
 public class Game {
     private int size;  // Déclare la variable 'size'
     private PlayerColor[][] grid;
@@ -10,7 +9,9 @@ public class Game {
     private AbstractPlayer whitePlayer;
     private AbstractPlayer blackPlayer;
 
-    // Constructeur modifié
+    // --------------------------------------
+    // Constructeur principal (existant)
+    // --------------------------------------
     public Game(int size, AbstractPlayer whitePlayer, AbstractPlayer blackPlayer) {
         this.size = size;  // Initialisation de la variable 'size'
         this.whitePlayer = whitePlayer;
@@ -23,9 +24,48 @@ public class Game {
         this.grid = new PlayerColor[size][size];
     }
 
+    // --------------------------------------
+    // Nouveau : Constructeur de copie
+    // --------------------------------------
+    public Game(Game other) {
+        // 1) Copier la taille
+        this.size = other.size;
 
+        // 2) Allouer et copier la grille
+        this.grid = new PlayerColor[size][size];
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                this.grid[i][j] = other.grid[i][j];
+            }
+        }
 
+        // 3) Copier le joueur courant et l'état
+        this.currentPlayer = other.currentPlayer;
+        this.theWinner = other.theWinner;
+        this.over = other.over;
 
+        // 4) Copier le compteur de captures
+        this.capturesWhite = other.capturesWhite;
+        this.capturesBlack = other.capturesBlack;
+
+        // 5) Copier les joueurs
+        // Pour le Minimax, on peut laisser les mêmes références,
+        // ou recréer d'autres IA/Humans. À toi de voir.
+        this.whitePlayer = other.whitePlayer;
+        this.blackPlayer = other.blackPlayer;
+    }
+
+    // --------------------------------------
+    // Nouveau : Méthode clone()
+    // --------------------------------------
+    @Override
+    public Game clone() {
+        return new Game(this);
+    }
+
+    // --------------------------------------
+    // Méthodes existantes
+    // --------------------------------------
     public AbstractPlayer getCurrentPlayer() {
         return (currentPlayer == PlayerColor.WHITE) ? whitePlayer : blackPlayer;
     }
@@ -78,13 +118,11 @@ public class Game {
 
             // Vérifier la capture dans une direction
             if (canCapture(x, y, dx, dy)) {
-                System.out.println("Capture détectée à partir de (" + x + "," + y + ") dans la direction (" + dx + "," + dy + ")");
                 captureStones(x, y, dx, dy);
             }
 
             // Vérifier la capture dans la direction opposée
             if (canCapture(x, y, -dx, -dy)) {
-                System.out.println("Capture détectée à partir de (" + x + "," + y + ") dans la direction opposée (" + -dx + "," + -dy + ")");
                 captureStones(x, y, -dx, -dy);
             }
         }
@@ -103,20 +141,17 @@ public class Game {
         // Vérifie si les pierres capturées et de bordure sont correctes
         return grid[x1][y1] == currentPlayer.inverse() // Première pierre adverse
                 && grid[x2][y2] == currentPlayer.inverse() // Deuxième pierre adverse
-                && grid[x3][y3] == currentPlayer;         // Pierre actuelle du joueur
+                && grid[x3][y3] == currentPlayer;          // Pierre actuelle du joueur
     }
 
     private void captureStones(int x, int y, int dx, int dy) {
         int x1 = x + dx, y1 = y + dy;
         int x2 = x + 2 * dx, y2 = y + 2 * dy;
 
-        // Vérifie si les pierres à capturer sont bien dans les limites
         if (isWithinBounds(x1, y1) && isWithinBounds(x2, y2)) {
-            System.out.println("Pierres capturées : (" + x1 + "," + y1 + ") et (" + x2 + "," + y2 + ")");
             grid[x1][y1] = null;
             grid[x2][y2] = null;
 
-            // Met à jour le compteur de captures
             if (currentPlayer == PlayerColor.BLACK) {
                 capturesBlack += 2;
             } else {
@@ -130,7 +165,8 @@ public class Game {
 
         for (int[] dir : directions) {
             int dx = dir[0], dy = dir[1];
-            if (countConsecutive(x, y, dx, dy) + countConsecutive(x, y, -dx, -dy) - 1 >= 5) {
+            if (countConsecutive(x, y, dx, dy)
+                    + countConsecutive(x, y, -dx, -dy) - 1 >= 5) {
                 return true;
             }
         }
@@ -169,4 +205,3 @@ public class Game {
         return (player == PlayerColor.WHITE) ? capturesWhite : capturesBlack;
     }
 }
-

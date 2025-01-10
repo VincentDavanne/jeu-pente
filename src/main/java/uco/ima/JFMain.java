@@ -10,7 +10,7 @@ public class JFMain extends JFrame {
     private JPanel contentPane;
     private JPGrid gameGrid;
     private Game game;
-    private int size = 19;
+    private int size = 5;
     private JPanel pnDroit;
     private JPanel pnChoix;
     private JLabel lblNewLabel;
@@ -47,7 +47,7 @@ public class JFMain extends JFrame {
 
         // Création des joueurs avec la couleur spécifique
         AbstractPlayer whitePlayer = new HumanPlayer(PlayerColor.WHITE);  // Exemple : Humain avec la couleur blanche
-        AbstractPlayer blackPlayer = new AIPlayer(PlayerColor.BLACK);    // Exemple : IA avec la couleur noire
+        AbstractPlayer blackPlayer = new PlayerAIMinMax(PlayerColor.BLACK);    // Exemple : IA avec la couleur noire
 
         // Initialisation du jeu avec les joueurs
         game = new Game(size, whitePlayer, blackPlayer);
@@ -111,13 +111,13 @@ public class JFMain extends JFrame {
         if (isWhiteHuman) {
             whitePlayer = new HumanPlayer(PlayerColor.WHITE);  // Joueur blanc humain
         } else {
-            whitePlayer = new AIPlayer(PlayerColor.WHITE);     // Joueur blanc IA
+            whitePlayer = new PlayerAIMinMax(PlayerColor.WHITE);     // Joueur blanc IA
         }
 
         if (isBlackHuman) {
             blackPlayer = new HumanPlayer(PlayerColor.BLACK);  // Joueur noir humain
         } else {
-            blackPlayer = new AIPlayer(PlayerColor.BLACK);     // Joueur noir IA
+            blackPlayer = new PlayerAIMinMax(PlayerColor.BLACK);     // Joueur noir IA
         }
 
         // Redémarre le jeu avec les nouveaux joueurs
@@ -137,7 +137,7 @@ public class JFMain extends JFrame {
         while (!game.isOver()) {
             AbstractPlayer currentPlayer = game.getCurrentPlayer();
 
-            if (currentPlayer instanceof AIPlayer) {
+            if (currentPlayer instanceof PlayerAIMinMax) {
                 // Jouer un coup automatiquement pour l'IA
                 Position move = currentPlayer.getMove(game);
                 game.makeMove(move);
