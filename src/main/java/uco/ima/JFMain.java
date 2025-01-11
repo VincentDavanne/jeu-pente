@@ -150,15 +150,5 @@ public class JFMain extends JFrame {
                 e.printStackTrace();
             }
         }
-
-        // Partie terminée
-        SwingUtilities.invokeLater(() -> {
-            JOptionPane.showMessageDialog(this,
-                    "Le match est terminé ! " + game.getWinner() + " a gagné !");
-        });
     }
-
-
-
-
 }

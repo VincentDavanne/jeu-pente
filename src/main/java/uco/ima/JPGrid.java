@@ -63,8 +63,13 @@ public class JPGrid extends JPanel {
 
             if (game.isOver()) {
                 repaint();
+                if (game.isEgalite()) {
                 JOptionPane.showMessageDialog(this,
-                        "Le match est terminé ! " + game.getWinner() + " a gagné !");
+                        "Le match est terminé ! Match nul !");
+            } else {
+                JOptionPane.showMessageDialog(this,
+                       "Le match est terminé ! " + game.getWinner() + " a gagné !");
+           }
                 disableClick();
             }
         } else {
@@ -108,10 +113,15 @@ public class JPGrid extends JPanel {
         g.setColor(Color.WHITE);
         g.drawString("Captures WHITE: " + game.getCaptures(PlayerColor.WHITE), b, yMax + 50);
 
-        // Si partie terminée, afficher un message
         if (game.isOver()) {
-            g.setColor(Color.RED);
-            g.drawString("Victoire de " + game.getWinner() + " !", b, yMax + 70);
+            if (game.isEgalite()) {
+                g.setColor(Color.RED);
+                g.drawString("Match nul !", b, yMax + 70);
+            } else {
+                g.setColor(Color.RED);
+                g.drawString("Victoire de " + game.getWinner() + " !", b, yMax + 70);
+            }
         }
+
     }
 }

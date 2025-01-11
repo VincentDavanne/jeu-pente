@@ -8,6 +8,7 @@ public class Game {
     private int capturesWhite, capturesBlack;
     private AbstractPlayer whitePlayer;
     private AbstractPlayer blackPlayer;
+    private boolean egalite;
 
     // --------------------------------------
     // Constructeur principal (existant)
@@ -92,7 +93,7 @@ public class Game {
             throw new IllegalArgumentException("Coup invalide !");
         }
 
-        // Place la pierre sur la grille
+        // Place la pierre
         grid[x][y] = currentPlayer;
 
         // Vérifie les captures
@@ -102,13 +103,25 @@ public class Game {
         if (checkWin(x, y)) {
             over = true;
             theWinner = currentPlayer;
-        } else if (capturesWhite >= 10 || capturesBlack >= 10) { // Victoire par captures
+        }
+        else if (capturesWhite >= 10 || capturesBlack >= 10) {
+            // Victoire par captures
             over = true;
             theWinner = (capturesWhite >= 10) ? PlayerColor.WHITE : PlayerColor.BLACK;
         }
+        else {
+            // --- Nouveau : test d'égalité ---
+            if (isBoardFull()) {
+                over = true;
+                egalite = true;       // On signale l'égalité
+                theWinner = null; // Pas de gagnant
+            }
+        }
 
-        // Change de joueur
-        currentPlayer = currentPlayer.inverse();
+        // Change de joueur s'il n'y a pas de fin
+        if (!over) {
+            currentPlayer = currentPlayer.inverse();
+        }
     }
 
     private void checkAndCapture(int x, int y) {
@@ -189,6 +202,17 @@ public class Game {
         return x >= 0 && x < size && y >= 0 && y < size;
     }
 
+    private boolean isBoardFull() {
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                if (grid[i][j] == null) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     public PlayerColor getPion(int x, int y) {
         return grid[x][y];
     }
@@ -203,5 +227,11 @@ public class Game {
 
     public int getCaptures(PlayerColor player) {
         return (player == PlayerColor.WHITE) ? capturesWhite : capturesBlack;
+    }
+    public boolean isEgalite() {
+        return egalite;
+    }
+    public boolean setEgalite(boolean egalite) {
+        return this.egalite = egalite;
     }
 }
