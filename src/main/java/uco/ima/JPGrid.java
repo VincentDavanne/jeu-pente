@@ -12,9 +12,7 @@ public class JPGrid extends JPanel {
     private Game game;           // Objet représentant la grille de jeu
     private MouseAdapter mousePlay;
 
-    /**
-     * Create the panel.
-     */
+
     public JPGrid(Game game, int size) {
         this.size = size;
         this.game = game;
@@ -45,10 +43,7 @@ public class JPGrid extends JPanel {
         int x = e.getX();
         int y = e.getY();
 
-        // -----------------------------
-        // 2ème solution : Math.round + clamp
-        // -----------------------------
-        // 1) On calcule l'indice avec Math.round
+        //On calcule l'indice avec Math.round pour que le clique soit au bon endroit entre les lignes
         int j = Math.round((float)(x - b) / s);
         int i = Math.round((float)(y - b) / s);
 
@@ -92,7 +87,7 @@ public class JPGrid extends JPanel {
             g.drawLine(x, b, x, yMax);
         }
 
-        // Dessiner les pierres
+        // Dessiner les pions
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 PlayerColor pion = game.getPion(i, j);
@@ -106,7 +101,7 @@ public class JPGrid extends JPanel {
             }
         }
 
-        // Afficher le score de captures
+        // Afficher le score
         g.setFont(new Font("Arial", Font.BOLD, 16));
         g.setColor(Color.BLACK);
         g.drawString("Captures BLACK: " + game.getCaptures(PlayerColor.BLACK), b, yMax + 30);
@@ -122,6 +117,5 @@ public class JPGrid extends JPanel {
                 g.drawString("Victoire de " + game.getWinner() + " !", b, yMax + 70);
             }
         }
-
     }
 }

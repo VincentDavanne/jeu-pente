@@ -231,7 +231,4 @@ public class Game {
     public boolean isEgalite() {
         return egalite;
     }
-    public boolean setEgalite(boolean egalite) {
-        return this.egalite = egalite;
-    }
 }

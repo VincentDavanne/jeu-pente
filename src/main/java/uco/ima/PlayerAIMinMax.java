@@ -3,14 +3,11 @@ package uco.ima;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * IA basée sur l'algorithme Minimax avec élagage alpha-bêta.
- */
 public class PlayerAIMinMax extends AbstractPlayer {
 
     private static final int MAX_DEPTH = 5;  // Ajustez la profondeur à votre convenance
 
-    // --- Nouveau : compteur pour suivre le nombre de nœuds explorés ---
+    //compteur pour suivre le nombre de nœuds explorés
     private static long nodesVisited = 0;
 
     public PlayerAIMinMax(PlayerColor color) {
@@ -30,7 +27,7 @@ public class PlayerAIMinMax extends AbstractPlayer {
         Position bestMove = null;
         int bestValue = Integer.MIN_VALUE;
 
-        // "isMaximizing" : est-ce le tour de l’IA elle-même ?
+        //est-ce le tour de l’IA
         boolean isMaximizing = (game.getCurrentPlayerColor() == this.getColor());
 
         // Initialisation alpha/beta
@@ -50,15 +47,12 @@ public class PlayerAIMinMax extends AbstractPlayer {
             alpha = Math.max(alpha, bestValue);
         }
 
-        // Affiche ou log le nombre de nœuds visités
+        // Affiche le nombre de nœuds
         System.out.println("Nombre de nœuds explorés (alpha-bêta) : " + nodesVisited);
 
         return bestMove;
     }
 
-    /**
-     * Minimax avec élagage alpha-bêta.
-     */
     private int alphaBetaMinimax(Game game, int depth, int alpha, int beta, boolean isMaximizing) {
         // Incrémenter le compteur de nœuds
         nodesVisited++;
@@ -106,9 +100,7 @@ public class PlayerAIMinMax extends AbstractPlayer {
         }
     }
 
-    /**
-     * Évalue rapidement l'état du plateau.
-     */
+    //Pour évaluer le plateau de jeu
     private int evaluateBoard(Game game) {
         if (game.isOver()) {
             if (game.getWinner() == this.getColor()) {

@@ -17,9 +17,7 @@ public class JFMain extends JFrame {
     private JComboBox cbBlanc;
     private JLabel lblJoueurNoir;
     private JComboBox cbNoir;
-    /**
-     * Launch the application.
-     */
+
     public static void main(String[] args) {
         EventQueue.invokeLater(() -> {
             try {
@@ -31,10 +29,6 @@ public class JFMain extends JFrame {
         });
     }
 
-    /**
-     * Create the frame.
-     */
-    // JFMain.java
     public JFMain() {
         setTitle("Jeu de Pente");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -84,12 +78,12 @@ public class JFMain extends JFrame {
         }));
         pnChoix.add(cbNoir);
 
-        // Bouton "Start"
+        // Bouton "Demarrer"
         JButton btnStart = new JButton("Démarrer");
         pnChoix.add(new JLabel()); // Pour l'alignement
         pnChoix.add(btnStart);
 
-        // Action du bouton "Start"
+        // Action du bouton "Demarrer"
         btnStart.addActionListener(e -> startGame());
     }
 
