@@ -10,15 +10,13 @@ public class JFMain extends JFrame {
     private JPanel contentPane;
     private JPGrid gameGrid;
     private Game game;
-    private int size = 5;
+    private int size = 5 + 1; // Premier chiffre : taille de la grille
     private JPanel pnDroit;
     private JPanel pnChoix;
     private JLabel lblNewLabel;
     private JComboBox cbBlanc;
     private JLabel lblJoueurNoir;
     private JComboBox cbNoir;
-    //private AbstractPlayer whitePlayer, blackPlayer;// Taille de la grille
-
     /**
      * Launch the application.
      */

@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * IA basée sur l'algorithme Minimax.
+ * IA basée sur l'algorithme Minimax avec élagage alpha-bêta.
  */
 public class PlayerAIMinMax extends AbstractPlayer {
 
-    // Profondeur maximale de l'arbre
-    private static final int MAX_DEPTH = 5;  // Ajuste selon tes besoins
+    private static final int MAX_DEPTH = 5;  // Ajustez la profondeur à votre convenance
+
+    // --- Nouveau : compteur pour suivre le nombre de nœuds explorés ---
+    private static long nodesVisited = 0;
 
     public PlayerAIMinMax(PlayerColor color) {
         super(color);
@@ -17,45 +19,50 @@ public class PlayerAIMinMax extends AbstractPlayer {
 
     @Override
     public Position getMove(Game game) {
-        // Récupère tous les coups possibles
-        List<Position> possibleMoves = getAllValidMoves(game);
+        // Remettre le compteur à zéro au début d'un nouveau coup
+        nodesVisited = 0;
 
-        // Si pas de coup possible
+        List<Position> possibleMoves = getAllValidMoves(game);
         if (possibleMoves.isEmpty()) {
             return null;
         }
 
-        // On choisit le meilleur coup selon Minimax
         Position bestMove = null;
         int bestValue = Integer.MIN_VALUE;
 
-        // "isMaximizing" = est-ce que c'est le tour de NOTRE IA ?
+        // "isMaximizing" : est-ce le tour de l’IA elle-même ?
         boolean isMaximizing = (game.getCurrentPlayerColor() == this.getColor());
 
-        for (Position move : possibleMoves) {
-            // 1. Cloner l'état du jeu
-            Game clonedGame = cloneGame(game);
+        // Initialisation alpha/beta
+        int alpha = Integer.MIN_VALUE;
+        int beta = Integer.MAX_VALUE;
 
-            // 2. Jouer ce coup dans le clone
+        for (Position move : possibleMoves) {
+            Game clonedGame = cloneGame(game);
             clonedGame.makeMove(move);
 
-            // 3. Évaluer la position à profondeur (MAX_DEPTH - 1)
-            int moveValue = minimax(clonedGame, MAX_DEPTH - 1, !isMaximizing);
+            int moveValue = alphaBetaMinimax(clonedGame, MAX_DEPTH - 1, alpha, beta, !isMaximizing);
 
-            // Au niveau supérieur, on choisit le coup qui MAXIMISE le score
             if (moveValue > bestValue) {
                 bestValue = moveValue;
                 bestMove = move;
             }
+            alpha = Math.max(alpha, bestValue);
         }
+
+        // Affiche ou log le nombre de nœuds visités
+        System.out.println("Nombre de nœuds explorés (alpha-bêta) : " + nodesVisited);
 
         return bestMove;
     }
 
     /**
-     * Algorithme Minimax simple (pas d'alpha-bêta).
+     * Minimax avec élagage alpha-bêta.
      */
-    private int minimax(Game game, int depth, boolean isMaximizing) {
+    private int alphaBetaMinimax(Game game, int depth, int alpha, int beta, boolean isMaximizing) {
+        // Incrémenter le compteur de nœuds
+        nodesVisited++;
+
         // Condition d'arrêt
         if (depth == 0 || game.isOver()) {
             return evaluateBoard(game);
@@ -67,26 +74,35 @@ public class PlayerAIMinMax extends AbstractPlayer {
         }
 
         if (isMaximizing) {
-            int bestVal = Integer.MIN_VALUE;
+            int value = Integer.MIN_VALUE;
             for (Position move : possibleMoves) {
-                // Clone + makeMove
                 Game clonedGame = cloneGame(game);
                 clonedGame.makeMove(move);
 
-                int value = minimax(clonedGame, depth - 1, false);
-                bestVal = Math.max(bestVal, value);
+                int moveValue = alphaBetaMinimax(clonedGame, depth - 1, alpha, beta, false);
+                value = Math.max(value, moveValue);
+
+                alpha = Math.max(alpha, value);
+                if (alpha >= beta) {
+                    break;  // coupure
+                }
             }
-            return bestVal;
+            return value;
         } else {
-            int bestVal = Integer.MAX_VALUE;
+            int value = Integer.MAX_VALUE;
             for (Position move : possibleMoves) {
                 Game clonedGame = cloneGame(game);
                 clonedGame.makeMove(move);
 
-                int value = minimax(clonedGame, depth - 1, true);
-                bestVal = Math.min(bestVal, value);
+                int moveValue = alphaBetaMinimax(clonedGame, depth - 1, alpha, beta, true);
+                value = Math.min(value, moveValue);
+
+                beta = Math.min(beta, value);
+                if (beta <= alpha) {
+                    break;  // coupure
+                }
             }
-            return bestVal;
+            return value;
         }
     }
 
@@ -94,26 +110,18 @@ public class PlayerAIMinMax extends AbstractPlayer {
      * Évalue rapidement l'état du plateau.
      */
     private int evaluateBoard(Game game) {
-        // Si la partie est terminée, on regarde le gagnant
         if (game.isOver()) {
             if (game.getWinner() == this.getColor()) {
-                // IA gagne => très grand score
-                return 100000;
+                return 100000;  // Gagnant
             } else {
-                // Adversaire gagne => très petit score
-                return -100000;
+                return -100000; // Perdant
             }
         }
-
-        // Sinon, heuristique simple : différence de captures
         int myCaptures = game.getCaptures(this.getColor());
         int oppCaptures = game.getCaptures(this.getColor().inverse());
-        return (myCaptures - oppCaptures);
+        return myCaptures - oppCaptures;
     }
 
-    /**
-     * Retourne la liste de tous les coups valides.
-     */
     private List<Position> getAllValidMoves(Game game) {
         List<Position> moves = new ArrayList<>();
         int size = game.getSize();
@@ -128,12 +136,7 @@ public class PlayerAIMinMax extends AbstractPlayer {
         return moves;
     }
 
-    /**
-     * Utilise le constructeur de copie
-     */
     private Game cloneGame(Game original) {
-        // Avec le nouveau constructeur de copie ou la méthode clone()
         return new Game(original);
-        // ou : return original.clone();
     }
 }
